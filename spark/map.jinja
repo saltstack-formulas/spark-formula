@@ -26,7 +26,8 @@
   "archive_name": archive_name,
   "archive_url": "%s/%s.%s"|format(url, archive_name, spark.archive_type),
   "archive_hash_url": hash_url,
-  "master_uri": "spark://%s:%s"|format(spark.master_host, spark.master_port),
+  "master_uri": "spark://%s:%s"|format(salt['grains.get']('spark:lookup:master_host', spark.master_host),
+                                       salt['grains.get']('spark:lookup:master_port', spark.master_port)),
   'config': config,
   'work_dir': spark.get('work_dir', '%s/work'|format(real_root))
 }) %}

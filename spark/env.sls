@@ -17,19 +17,22 @@ bootstrap-spark:
     - system: True
   pkg.installed:
     - pkgs: {{ pkg_deps | json }}
-  cmd.run:
-    - name: |
-        curl -s https://archive.apache.org/dist/spark/KEYS -o {{ pub_key }}
     - require:
-        - pkg: bootstrap-spark
-        - user: bootstrap-spark
+        - pkg: check-for-java
 
-          
-{{ '%s.asc'|format(artifact) }}:  
+{{ pub_key }}:
   file.managed:
-    - name: {{ '%s.asc'|format(artifact) }}
-    - source: {{ spark.archive_hash_url }}
+    - source:
+      - salt://spark/files/spark-pub-keys.asc
+      - https://www.apache.org/dist/spark/KEYS
     - skip_verify: true
+    - user: root
+    - mode: 0400
+    - template: jinja
+    - require_in:
+        - module: import-apache-keys
+    - require:
+        - user: bootstrap-spark
 
 check-for-java:
   pkg.installed:
@@ -43,22 +46,39 @@ import-apache-keys:
     - kwargs:
         user: salt
         filename: {{ pub_key }}
-    - watch_in:
-      - cmd: spark-cache-archive
+
+{{ '%s.asc'|format(artifact) }}:
+  file.managed:
+    - source:
+        - salt://spark/files/{{ archive_name }}.asc
+        - {{ spark.archive_hash_url }}
+    - template: jinja
+    - skip_verify: true
 
 spark-cache-archive:
   file.managed:
     - name: {{ artifact }}
-    - source: {{ spark.archive_url }}
+    - source:
+        - salt://spark/files/{{ archive_name }}
+        - {{ spark.archive_url }}
     - skip_verify: true
+    - require:
+      - file: {{ '%s.asc'|format(artifact) }}      
     - unless:
         - test -f {{ artifact }}
 
+check-spark-signatures:
+  file.directory:
+    - name: /etc/salt/pki
+    - mode: '0700'
+    - user: root
   cmd.run:
     - name: |
-        gpg --homedir=/etc/salt/gpgkeys --verify {{ '%s.asc'|format(artifact) }} {{ artifact }}
+        gpg --homedir=/etc/salt/pki --import {{ pub_key }}
+        gpg --homedir=/etc/salt/pki --verify {{ '%s.asc'|format(artifact) }} {{ artifact }}
+    - runas: root
     - require:
-        - file: {{ '%s.asc'|format(artifact) }}
+        - file: check-spark-signatures
         - file: spark-cache-archive
           
 spark-extract-archive:
@@ -83,7 +103,7 @@ spark-extract-archive:
     - if_missing: {{ spark.real_root }}
     - archive_format: tar
     - require:
-        - cmd: spark-cache-archive
+        - cmd: check-spark-signatures
 
 spark-setup-config:
   file.directory:
@@ -96,13 +116,13 @@ spark-setup-config:
     - require:
         - archive: spark-extract-archive
         - alternatives: spark-update-path
-          
+
 spark-update-path:
   alternatives.install:
     - name: spark-home-link
     - link: {{ spark.alt_root }}
     - path: {{ spark.real_root }}
-    - priority: {{ None | strftime('%s') }}
+    - priority: 99
     - require:
         - archive: spark-extract-archive
 

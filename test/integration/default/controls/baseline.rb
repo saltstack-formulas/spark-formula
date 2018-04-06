@@ -57,7 +57,7 @@ end
 
 control 'spark-defaults' do
   title 'Checking Spark configuration files'
-  describe file('/etc/spark/spark-env.sh') do
+  describe file('/opt/spark/conf/spark-env.sh') do
     it { should be_file }
     it { should be_owned_by 'spark' }
     it { should be_grouped_into 'spark'}
@@ -68,7 +68,7 @@ control 'spark-defaults' do
     it { should_not be_writable.by('group') }
     it { should_not be_writable.by('other') }  end
   
-  describe file('/etc/spark/log4j.properties') do
+  describe file('/opt/spark/conf/log4j.properties') do
     it { should be_file }
     it { should be_owned_by 'spark'}
     it { should be_grouped_into 'spark'}
@@ -79,7 +79,7 @@ control 'spark-defaults' do
     it { should_not be_writable.by('group') }
     it { should_not be_writable.by('other') }  end
   
-  describe file('/etc/spark/spark-defaults.conf') do
+  describe file('/opt/spark/conf/spark-defaults.conf') do
     it { should be_file }
     it { should be_owned_by 'spark' }
     it { should be_grouped_into 'spark'}
@@ -89,12 +89,12 @@ control 'spark-defaults' do
     it { should be_writable.by('owner') }
     it { should_not be_writable.by('group') }
     it { should_not be_writable.by('other') }    
-    its('content') { should match /spark\.local\.dir=\/tmp\/not-so-awesome/ }
-    its('content') { should match /spark\.executor\.extraClassPath=\/opt\/spark\/jars:\/usr\/local/ }
-    its('content') { should match /spark\.driver\.memory=1g/ }
+    its('content') { should match /spark\.local\.dir\s+\/tmp\/not-so-awesome/ }
+    its('content') { should match /spark\.executor\.extraClassPath\s+\/opt\/spark\/jars:\/usr\/local/ }
+    its('content') { should match /spark\.driver\.memory\s+1g/ }
   end
 
-  describe file('/etc/spark/spark-env.sh') do
+  describe file('/opt/spark/conf/spark-env.sh') do
     it { should be_file }
     it { should be_owned_by 'spark' }
     it { should be_grouped_into 'spark'}

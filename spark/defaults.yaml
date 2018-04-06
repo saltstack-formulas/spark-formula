@@ -16,7 +16,7 @@ default:
   niceness: 0
   
   # controls the version of spark to be installed
-  version: "2.2.0"
+  version: "2.3.0"
   # used to build the artifact filename
   hadoop_version: "2.7"
   # set to false if the "without-hadoop" version is desired

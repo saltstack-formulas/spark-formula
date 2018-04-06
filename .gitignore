@@ -2,3 +2,4 @@
 *.swp
 *.swo
 .ruby-version
+spark/files/*
