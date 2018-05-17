@@ -1,4 +1,5 @@
 {% from "spark/map.jinja" import spark with context %}
+{% set curtime = salt['cmd.run']("date +%s") %}
 {% with archive_name = "%s.%s"|format(spark.archive_name, spark.archive_type) %}
 {% set artifact = '/tmp/%s'|format(archive_name) %}
 {% set pub_key = '/tmp/spark-pub-keys.asc' %}
@@ -98,8 +99,7 @@ spark-extract-archive:
         - file://{{ artifact }}
         - salt://{{ archive_name }}
         - {{ spark.archive_url }}
-    - user: {{ spark.user }}
-    - group: {{ spark.user }}
+    - trim_output: true
     - if_missing: {{ spark.real_root }}
     - archive_format: tar
     - require:
@@ -110,7 +110,7 @@ spark-setup-config:
     - name: {{ spark.config_dir }}
     - user: {{ spark.user }}
     - group: {{ spark.user }}
-    - mode: 755
+    - mode: 775
     - onlyif:
         - ! test -d {{ spark.config_dir }}
     - require:
@@ -122,7 +122,7 @@ spark-update-path:
     - name: spark-home-link
     - link: {{ spark.alt_root }}
     - path: {{ spark.real_root }}
-    - priority: 99
+    - priority: {{ curtime }}
     - require:
         - archive: spark-extract-archive
 

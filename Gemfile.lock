@@ -43,13 +43,13 @@ GEM
       tomlrb (~> 1.2)
       train (~> 0.29, >= 0.29.2)
     json (2.1.0)
+    kitchen-docker (2.6.0)
+      test-kitchen (>= 1.0.0)
     kitchen-inspec (0.20.0)
       hashie (~> 3.4)
       inspec (>= 0.34.0, < 2.0.0)
       test-kitchen (~> 1.6)
     kitchen-salt (0.0.23)
-      test-kitchen (~> 1.4)
-    kitchen-vagrant (1.2.1)
       test-kitchen (~> 1.4)
     little-plugger (1.1.4)
     logging (2.2.2)
@@ -138,12 +138,12 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  kitchen-docker
   kitchen-inspec
   kitchen-salt (>= 0.0.11)
-  kitchen-vagrant
   net-ssh (~> 2.0)
   test-kitchen (> 1.2.1)
   unf
 
 BUNDLED WITH
-   1.16.0.pre.3
+   1.16.1

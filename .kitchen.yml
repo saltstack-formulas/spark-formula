@@ -1,6 +1,13 @@
+<%
+distrib, infos    = ENV.fetch('DISTRIB', 'ubuntu:xenial/16.04').split(':')
+codename, version = infos.split('/')
+%>
 ---
 driver:
-  name: vagrant
+  name: docker
+  use_sudo: false
+  privileged: true
+  require_chef_omnibus: false
   
 verifier:
   name: inspec
@@ -9,9 +16,7 @@ verifier:
 provisioner:
   name: salt_solo
   log_level: debug
-  omnibus_cachier: false
-  require_chef_omnibus: latest
-  provision: false
+  omnibus_cachier: true
   salt_install: bootstrap
   salt_version: latest
   salt_minion_id: kitchen-test-spark
@@ -31,8 +36,15 @@ provisioner:
 
 platforms:
   - name: ubuntu
-    driver:
-      box: bento/ubuntu-16.04
+    image: "ubuntu/xenial"
+    platform: "ubuntu"
+    driver_config:
+      run_command: /lib/systemd/systemd
+      pid_one_command: /lib/systemd/systemd      
+      provision_command:
+        - apt-get update && apt-get install -y locales
+        - echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
+        - locale-gen en_US.UTF-8      
 
 
 suites:
